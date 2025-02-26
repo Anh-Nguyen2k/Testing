@@ -1,0 +1,36 @@
+#cloud-config
+power_state:
+  mode: reboot
+system_info:
+  default_user:
+    name: cirrascale
+password: cirrascaleGPUXXXX
+chpasswd:
+  expire: false
+ssh_import_id:
+  - gh:cirrascale
+runcmd:
+  - ufw enable
+  - ufw allow ssh
+  - systemctl set-default multi-user.target
+  - touch /etc/cloud/cloud-init.disabled
+  - sed -i /dhcp4/d /etc/netplan/50-cloud-init.yaml
+  # install nvidia-driver,cuda, CUDNN
+  - CUDA="LATEST" CUDA_DRIVER="LATEST" CUDA_DRIVER_FABRICMANAGER="LATEST" CUDNN= sh -c "$(curl -s https://raw.githubusercontent.com/Anh-Nguyen2k/Testing/refs/heads/main/cloudconfig.sh)"
+  # enable nvidia persistenced
+  - mkdir /etc/systemd/system/nvidia-persistenced.service.d/
+  - |
+    echo "[Service]
+    ExecStart=
+    ExecStart=/usr/bin/nvidia-persistenced --user nvidia-persistenced --persistence-mode --verbose" > /etc/systemd/system/nvidia-persistenced.service.d/override.conf
+  # install docker
+  - curl https://get.docker.com | bash
+  - usermod -aG docker cirrascale
+  - systemctl restart docker && systemctl enable docker
+  # install nvidia-container-toolkit
+  - curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+  - apt update && apt install -y nvidia-container-toolkit
+  - nvidia-ctk runtime configure --runtime=docker
+  - systemctl restart docker
+  # install nccl
+  - apt install -y libnccl2 libnccl-dev

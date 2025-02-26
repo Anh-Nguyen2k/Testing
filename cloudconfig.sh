@@ -17,7 +17,7 @@ dpkg -i $(basename $(curl -s -w "%{url_effective}" https://developer.download.nv
 # install kernel headers
 apt-get install -y linux-headers-$(uname -r)
 
-if [ "$CUDA" == "LATEST"]; then
+if [ "$CUDA" == "LATEST" ]; then
 	apt-get install cuda-toolkit -y && apt-mark hold cuda-toolkit
 elif [ $CUDA ]; then
 	apt-get install cuda-toolkit-$CUDA -y && apt-mark hold cuda-toolkit-$CUDA

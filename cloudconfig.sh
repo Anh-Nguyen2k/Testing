@@ -17,13 +17,13 @@ dpkg -i $(basename $(curl -s -w "%{url_effective}" https://developer.download.nv
 # install kernel headers
 apt-get install -y linux-headers-$(uname -r)
 
-if [ "$CUDA" = "LATEST" ]; then
+if [ "$CUDA" -eq "LATEST" ]; then
 	apt-get install cuda-toolkit -y && apt-mark hold cuda-toolkit
 elif [ $CUDA ]; then
 	apt-get install cuda-toolkit-$CUDA -y && apt-mark hold cuda-toolkit-$CUDA
 fi
 
-if [ "$CUDA_DRIVER" = "LATEST" ]; then
+if [ "$CUDA_DRIVER" -eq "LATEST" ]; then
 	if [ $CUDA_DRIVER_FABRICMANAGER ]; then
 		apt-get install cuda-drivers-fabricmanager -y && apt-mark hold cuda-drivers-fabricmanager
 		systemctl enable nvidia-fabricmanager

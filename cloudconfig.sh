@@ -10,6 +10,10 @@ systemctl set-default multi-user.target
 arch=x86_64
 distro=ubuntu$(echo $VERSION_ID | tr -d .)
 
+LATEST_CUDA_DRIVER=$(curl -s https://developer.download.nvidia.com/compute/cuda/repos/$distro/$arch/ | grep -oP 'nvidia-driver-\K[0-9]+' | sort -n | tail -n 1)
+NVSWITCH_FOUND=$(lspci | grep -i "Bridge: NVIDIA")
+NVL5_FOUND=$(lspci | grep -i "NVIDIA Corporation Device 2901")
+
 # https://forums.developer.nvidia.com/t/notice-cuda-linux-repository-key-rotation/212772
 # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#network-repo-installation-for-ubuntu
 dpkg -i $(basename $(curl -s -w "%{url_effective}" https://developer.download.nvidia.com/compute/cuda/repos/$distro/$arch/cuda-keyring_1.1-1_all.deb -O)) && apt-get update -y
@@ -17,31 +21,51 @@ dpkg -i $(basename $(curl -s -w "%{url_effective}" https://developer.download.nv
 # install kernel headers
 apt-get install -y linux-headers-$(uname -r)
 
-if [ "$CUDA" = "LATEST" ]; then
-	apt-get install cuda-toolkit -y && apt-mark hold cuda-toolkit
-elif [ $CUDA ]; then
-	apt-get install cuda-toolkit-$CUDA -y && apt-mark hold cuda-toolkit-$CUDA
+# install cuda library
+if [ $CUDA ]; then
+	apt-get install -y cuda-toolkit-$CUDA -y && apt-mark hold cuda-toolkit-$CUDA
+else
+	apt-get install -y cuda-toolkit -y && apt-mark hold cuda-toolkit
 fi
 
-if [ "$CUDA_DRIVER" = "LATEST" ]; then
-	if [ $CUDA_DRIVER_FABRICMANAGER ]; then
-		apt-get install cuda-drivers-fabricmanager -y && apt-mark hold cuda-drivers-fabricmanager
-		systemctl enable nvidia-fabricmanager
-	else
-		apt-get install cuda-drivers -y && apt-mark hold cuda-drivers
-	fi
-elif [ $CUDA_DRIVER ]; then
-	if [ $CUDA_DRIVER_FABRICMANAGER ]; then
-		apt-get install cuda-drivers-fabricmanager-$CUDA_DRIVER -y && apt-mark hold cuda-drivers-fabricmanager-$CUDA_DRIVER
-		systemctl enable nvidia-fabricmanager
-	else
-		apt-get install cuda-drivers-$CUDA_DRIVER -y && apt-mark hold cuda-drivers-$CUDA_DRIVER
-	fi
+# install nvidia open driver
+if [ $CUDA_DRIVER ]; then
+	apt install -y nvidia-driver-$CUDA_DRIVER-open nvidia-modprobe && apt-mark hold nvidia-driver-$CUDA_DRIVER-open
+else
+	$CUDA_DRIVER=$LATEST_CUDA_DRIVER
+	apt install -y nvidia-driver-$CUDA_DRIVER-open nvidia-modprobe && apt-mark hold nvidia-driver-$CUDA_DRIVER-open
 fi
 
+# install fabricmanager for nvswitch systems
+if [ $NVSWITCH_FOUND ]; then
+		apt-get install -y nvidia-fabricmanager-$CUDA_DRIVER -y && apt-mark hold nvidia-fabricmanager-$CUDA_DRIVER
+		systemctl enable nvidia-fabricmanager.service --now
+fi
+
+# install nvlsm for Gen5 nvlink systems
+if [ $NVL5_FOUND ]; then
+	apt-get install -y nvlsm -y && apt-mark hold nvlsm
+fi
+
+# install cudnn
 if [ $CUDNN ]; then
-	apt-get install libcudnn8=$CUDNN -y && apt-mark hold libcudnn8
+	apt-get install -y libcudnn9-cuda-12=$CUDNN libcudnn9-dev-cuda-12=$CUDNN -y && apt-mark hold libcudnn9-cuda-12 libcudnn9-dev-cuda-12
+else
+	apt-get install -y libcudnn9-cuda-12 libcudnn9-dev-cuda-12 -y && apt-mark hold libcudnn9-cuda-12 libcudnn9-dev-cuda-12
 fi
+
+# install nccl
+if [ $NCCL ]; then
+	apt-get install -y libnccl2=$NCCL libnccl-dev=$NCCL && apt-mark hold libnccl2 libnccl-dev
+else
+	apt-get install -y libnccl2 libnccl-dev && apt-mark hold libnccl2 libnccl-dev
+fi
+
+# enable persistence (keeps GPUs initialized)
+systemctl enable nvidia-persistenced.service
+
+# load nvidia-peermem module (enables RDMA GPU support)
+echo "nvidia-peermem" | tee -a /etc/modules
 
 # https://docs.nvidia.com/cuda/cuda-quick-start-guide/index.html#debian-x86_64-deb
 cat > /etc/profile.d/cirrascale-cuda.sh << 'EOF'
@@ -50,6 +74,6 @@ export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PAT
 EOF
 
 # prevent auto-upgrades from upgrading cuda and nvidia software
-sudo tee -a /etc/apt/apt.conf.d/50unattended-upgrades <<EOF
-Unattended-Upgrade::Package-Blacklist {"nvidia";"cuda";"libnvidia";"libcudnn";};  
+tee -a /etc/apt/apt.conf.d/50unattended-upgrades <<EOF
+Unattended-Upgrade::Package-Blacklist {"nvidia";"cuda";"libnvidia";"libcudnn";"libnccl";"nvlsm";};  
 EOF

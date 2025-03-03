@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-# sudo sh -c "$(curl -s https://raw.githubusercontent.com/cirrascalecloudservices/install/main/install-cuda.sh)"
+# sudo sh -c "$(curl -s https://raw.githubusercontent.com/Anh-Nguyen2k/Testing/refs/heads/main/cloudconfig.sh)"
 
 . /etc/os-release
 
@@ -22,14 +22,14 @@ dpkg -i $(basename $(curl -s -w "%{url_effective}" https://developer.download.nv
 apt-get install -y linux-headers-$(uname -r)
 
 # install cuda library
-if [ $CUDA ]; then
+if [ -n "$CUDA" ]; then
 	apt-get install -y cuda-toolkit-$CUDA -y && apt-mark hold cuda-toolkit-$CUDA
 else
 	apt-get install -y cuda-toolkit -y && apt-mark hold cuda-toolkit
 fi
 
 # install nvidia open driver
-if [ $CUDA_DRIVER ]; then
+if [ -n "$CUDA_DRIVER" ]; then
 	apt install -y nvidia-driver-$CUDA_DRIVER-open nvidia-modprobe && apt-mark hold nvidia-driver-$CUDA_DRIVER-open
 else
 	$CUDA_DRIVER=$LATEST_CUDA_DRIVER
@@ -37,18 +37,18 @@ else
 fi
 
 # install fabricmanager for nvswitch systems
-if [ $NVSWITCH_FOUND ]; then
+if [ -n "$NVSWITCH_FOUND" ]; then
 		apt-get install -y nvidia-fabricmanager-$CUDA_DRIVER -y && apt-mark hold nvidia-fabricmanager-$CUDA_DRIVER
 		systemctl enable nvidia-fabricmanager.service --now
 fi
 
 # install nvlsm for Gen5 nvlink systems
-if [ $NVL5_FOUND ]; then
+if [ -n "$NVL5_FOUND" ]; then
 	apt-get install -y nvlsm -y && apt-mark hold nvlsm
 fi
 
 # install cudnn
-if [ $CUDNN ]; then
+if [ -n "$CUDNN" ]; then
 	apt-get install -y libcudnn9-cuda-12=$CUDNN libcudnn9-dev-cuda-12=$CUDNN -y && apt-mark hold libcudnn9-cuda-12 libcudnn9-dev-cuda-12
 else
 	apt-get install -y libcudnn9-cuda-12 libcudnn9-dev-cuda-12 -y && apt-mark hold libcudnn9-cuda-12 libcudnn9-dev-cuda-12

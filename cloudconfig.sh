@@ -30,7 +30,7 @@ fi
 
 # install nvidia open driver
 if [ -n "$CUDA_DRIVER" ]; then
-	apt install -y nvidia-driver-$CUDA_DRIVER-open nvidia-modprobe && apt-mark hold nvidia-driver-$CUDA_DRIVER-open
+	apt install -y nvidia-driver-12.6-open nvidia-modprobe && apt-mark hold nvidia-driver-$CUDA_DRIVER-open
 else
 	$CUDA_DRIVER=$LATEST_CUDA_DRIVER
 	apt install -y nvidia-driver-$CUDA_DRIVER-open nvidia-modprobe && apt-mark hold nvidia-driver-$CUDA_DRIVER-open

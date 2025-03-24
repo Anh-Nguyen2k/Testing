@@ -16,7 +16,7 @@ LATEST_CUDA_DRIVER=$(curl -s https://developer.download.nvidia.com/compute/cuda/
 lspci_output=$(lspci -n)
 
 # IDs for A100, H100, B200, B100
-NVS_PCI_IDS=("Device 1af1" "Device 22a3" "Device 2901" "Device 29bc")
+NVS_PCI_IDS=("1af1" "22a3" "2901" "29bc")
 NVSWITCH_FOUND=""
 
 check_nvswitch() {
@@ -36,7 +36,7 @@ check_nvswitch() {
 check_nvswitch
 
 # IDs for B200, B100
-NVL5_PCI_IDS=("Device 2901" "Device 29bc")
+NVL5_PCI_IDS=("2901" "29bc")
 NVL5_FOUND=""
 
 check_nvl5() {

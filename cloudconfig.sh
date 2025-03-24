@@ -28,9 +28,6 @@ check_nvswitch() {
     done
     return 1  # Exit function with failure
 }
-# Run function to check for nvswitch installation
-NVSWITCH_FOUND=$(check_nvswitch)
-
 
 check_nvl5() {
 	# Variable to store lspci output
@@ -48,8 +45,6 @@ check_nvl5() {
     done
     return 1  # Exit function with failure
 }
-# Run function to check for nvswitch installation
-NVL5_FOUND=$(check_nvl5)
 
 # https://forums.developer.nvidia.com/t/notice-cuda-linux-repository-key-rotation/212772
 # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#network-repo-installation-for-ubuntu
@@ -74,13 +69,13 @@ else
 fi
 
 # install fabricmanager for nvswitch systems
-if [ $NVSWITCH_FOUND ]; then
-		apt-get install -y nvidia-fabricmanager-$CUDA_DRIVER -y && apt-mark hold nvidia-fabricmanager-$CUDA_DRIVER
-		systemctl enable nvidia-fabricmanager.service --now
-fi
+#if check_nvswitch; then
+		#apt-get install -y nvidia-fabricmanager-$CUDA_DRIVER -y && apt-mark hold nvidia-fabricmanager-$CUDA_DRIVER
+		#systemctl enable nvidia-fabricmanager.service --now
+#fi
 
 # install nvlsm for Gen5 nvlink systems
-if [ $NVL5_FOUND ]; then
+if check_nvl5; then
 	apt-get install -y nvlsm -y && apt-mark hold nvlsm
 fi
 

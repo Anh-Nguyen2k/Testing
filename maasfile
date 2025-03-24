@@ -16,7 +16,7 @@ runcmd:
   - touch /etc/cloud/cloud-init.disabled
   - sed -i /dhcp4/d /etc/netplan/50-cloud-init.yaml
   # install nvidia-driver,cuda, CUDNN
-  - CUDA=12-6 CUDA_DRIVER=560 CUDA_DRIVER_FABRICMANAGER=560 CUDNN= sh -c "$(curl -s https://raw.githubusercontent.com/Anh-Nguyen2k/Testing/refs/heads/main/cloudconfig.sh)"
+  - CUDA= CUDA_DRIVER= CUDA_DRIVER_FABRICMANAGER= CUDNN= sh -c "$(curl -s https://raw.githubusercontent.com/Anh-Nguyen2k/Testing/refs/heads/main/cloudconfig.sh)"
   # enable nvidia persistenced
   - mkdir /etc/systemd/system/nvidia-persistenced.service.d/
   - |

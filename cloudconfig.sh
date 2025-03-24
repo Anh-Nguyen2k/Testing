@@ -75,9 +75,9 @@ fi
 #fi
 
 # install nvlsm for Gen5 nvlink systems
-if check_nvl5; then
-	apt-get install -y nvlsm -y && apt-mark hold nvlsm
-fi
+#if check_nvl5; then
+	#apt-get install -y nvlsm -y && apt-mark hold nvlsm
+#fi
 
 # install cudnn
 if [ $CUDNN ]; then

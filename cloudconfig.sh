@@ -25,7 +25,6 @@ check_nvswitch() {
             return 0  # Exit function with success
         fi
     done
-    return 1  # Exit function with failure
 }
 
 check_nvl5() {
@@ -38,7 +37,6 @@ check_nvl5() {
             return 0  # Exit function with success
         fi
     done
-    return 1  # Exit function with failure
 }
 
 # https://forums.developer.nvidia.com/t/notice-cuda-linux-repository-key-rotation/212772

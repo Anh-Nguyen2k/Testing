@@ -15,29 +15,7 @@ LATEST_CUDA_DRIVER=$(curl -s https://developer.download.nvidia.com/compute/cuda/
 # Variable to store lspci output
 lspci_output=$(lspci -n)
 
-check_nvswitch() {
-	# IDs for A100, H100, B200, B100
-	NVS_PCI_IDS=("1af1" "22a3" "2901" "29bc")
 
-	# For loop that checks if machine matches any IDs
-	for id in "${NVS_PCI_IDS[@]}"; do
-        if echo "$lspci_output" | grep -i "$id"; then
-            return 0  # Exit function with success
-        fi
-    done
-}
-
-check_nvl5() {
-	# IDs for B200, B100
-	NVL5_PCI_IDS=("2901" "29bc")
-
-	# For loop that checks if machine matches any IDs
-	for id in "${NVL5_PCI_IDS[@]}"; do
-        if echo "$lspci_output" | grep -i "$id"; then
-            return 0  # Exit function with success
-        fi
-    done
-}
 
 # https://forums.developer.nvidia.com/t/notice-cuda-linux-repository-key-rotation/212772
 # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#network-repo-installation-for-ubuntu

@@ -47,6 +47,7 @@ check_nvswitch() {
             return 0  # Exit function with success
         fi
     done
+	return 1 
 }
 
 check_nvl5() {
@@ -59,6 +60,7 @@ check_nvl5() {
             return 0  # Exit function with success
         fi
     done
+	return 1
 }
 
 # install fabricmanager for nvswitch systems

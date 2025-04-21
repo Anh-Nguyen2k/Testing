@@ -46,7 +46,7 @@ check_nvswitch() {
         if echo "$lspci_output" | grep -i "$id"; then
             return 0  # Exit function with success
         fi
-    done
+	done
 	return 1 
 }
 
@@ -56,9 +56,9 @@ check_nvl5() {
 
 	# For loop that checks if machine matches any IDs
 	for id in "${NVL5_PCI_IDS[@]}"; do
-        if echo "$lspci_output" | grep -i "$id"; then
-            return 0  # Exit function with success
-        fi
+		if echo "$lspci_output" | grep -i "$id"; then
+			return 0  # Exit function with success
+		fi
 	done
 	return 1
 }

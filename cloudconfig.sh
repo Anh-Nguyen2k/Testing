@@ -59,7 +59,7 @@ check_nvl5() {
         if echo "$lspci_output" | grep -i "$id"; then
             return 0  # Exit function with success
         fi
-    done
+	done
 	return 1
 }
 
